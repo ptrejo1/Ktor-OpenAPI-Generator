@@ -21,8 +21,8 @@ import kotlin.reflect.typeOf
  */
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any> NormalOpenAPIRoute.get(
-    statusCode: HttpStatusCode? = null,
     vararg modules: RouteOpenAPIModule,
+    statusCode: HttpStatusCode? = null,
     example: TResponse? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams) -> Unit
 ) = route(HttpMethod.Get, modules, statusCode, example, body)
@@ -41,8 +41,8 @@ inline fun <reified TParams : Any, reified TResponse : Any> NormalOpenAPIRoute.g
  */
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : Any> NormalOpenAPIRoute.post(
-    statusCode: HttpStatusCode? = null,
     vararg modules: RouteOpenAPIModule,
+    statusCode: HttpStatusCode? = null,
     exampleResponse: TResponse? = null,
     exampleRequest: TRequest? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams, TRequest) -> Unit
@@ -62,8 +62,8 @@ inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : A
  */
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : Any> NormalOpenAPIRoute.put(
-    statusCode: HttpStatusCode? = null,
     vararg modules: RouteOpenAPIModule,
+    statusCode: HttpStatusCode? = null,
     exampleResponse: TResponse? = null,
     exampleRequest: TRequest? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams, TRequest) -> Unit
@@ -83,8 +83,8 @@ inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : A
  */
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : Any> NormalOpenAPIRoute.patch(
-    statusCode: HttpStatusCode? = null,
     vararg modules: RouteOpenAPIModule,
+    statusCode: HttpStatusCode? = null,
     exampleResponse: TResponse? = null,
     exampleRequest: TRequest? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams, TRequest) -> Unit
@@ -102,8 +102,8 @@ inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : A
  */
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any> NormalOpenAPIRoute.delete(
-    statusCode: HttpStatusCode? = null,
     vararg modules: RouteOpenAPIModule,
+    statusCode: HttpStatusCode? = null,
     example: TResponse? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams) -> Unit
 ) = route(HttpMethod.Delete, modules, statusCode, example, body)
@@ -120,8 +120,8 @@ inline fun <reified TParams : Any, reified TResponse : Any> NormalOpenAPIRoute.d
  */
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any> NormalOpenAPIRoute.head(
-    statusCode: HttpStatusCode? = null,
     vararg modules: RouteOpenAPIModule,
+    statusCode: HttpStatusCode? = null,
     example: TResponse? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams) -> Unit
 ) = route(HttpMethod.Head, modules, statusCode, example, body)

@@ -26,6 +26,7 @@ class OpenAPIAuthenticatedRoute<TAuth>(
         paramsType: KType,
         responseType: KType,
         requestType: KType,
+        statusCode: HttpStatusCode?,
         body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams, TRequest) -> Unit
     ) {
         child().apply {// child in case path is branch to prevent propagation of the mutable nature of the provider
@@ -35,7 +36,7 @@ class OpenAPIAuthenticatedRoute<TAuth>(
                 responseType,
                 requestType
             ) { pipeline, responder, p, b ->
-                AuthResponseContextImpl<TAuth, TResponse>(pipeline, authProvider, this, HttpStatusCode.OK, responder).body(p, b)
+                AuthResponseContextImpl<TAuth, TResponse>(pipeline, authProvider, this, statusCode, responder).body(p, b)
             }
         }
     }
@@ -44,6 +45,7 @@ class OpenAPIAuthenticatedRoute<TAuth>(
     internal fun <TParams : Any, TResponse : Any> handle(
         paramsType: KType,
         responseType: KType,
+        statusCode: HttpStatusCode?,
         body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams) -> Unit
     ) {
         child().apply {// child in case path is branch to prevent propagation of the mutable nature of the provider
@@ -53,7 +55,7 @@ class OpenAPIAuthenticatedRoute<TAuth>(
                 responseType,
                 typeOf<Unit>()
             ) { pipeline, responder, p: TParams, _ ->
-                AuthResponseContextImpl<TAuth, TResponse>(pipeline, authProvider, this, HttpStatusCode.OK, responder).body(p)
+                AuthResponseContextImpl<TAuth, TResponse>(pipeline, authProvider, this, statusCode, responder).body(p)
             }
         }
     }

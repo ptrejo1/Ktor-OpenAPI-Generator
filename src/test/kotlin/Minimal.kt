@@ -76,13 +76,13 @@ object Minimal {
             apiRouting {
 
                 //bare minimum, just like Ktor but strongly typed
-                get<StringParam, StringResponse>(HttpStatusCode.Accepted) { params ->
+                get<StringParam, StringResponse>(statusCode = HttpStatusCode.Accepted ) { params ->
                     respond(StringResponse(params.a))
                 }
 
                 route("inine").get<StringParam, StringResponse>(
-                    HttpStatusCode.NoContent,
                     info("String Param Endpoint", "This is a String Param Endpoint"), // A Route module that describes an endpoint, it is optional
+                    statusCode = HttpStatusCode.OK,
                     example = StringResponse("Hi")
                 ) { params ->
                     respond(StringResponse(params.a))
@@ -91,8 +91,8 @@ object Minimal {
                 route("block") {
                     // use Unit if there are no parameters / body / response
                     post<Unit, StringUsable,  StringUsable>(
-                        HttpStatusCode.InternalServerError,
                         info("String Post Endpoint", "This is a String Post Endpoint"),
+                        statusCode = HttpStatusCode.OK,
                         exampleRequest = StringUsable("Ho"),
                         exampleResponse = StringUsable("Ho")
                     ) { params, body ->
