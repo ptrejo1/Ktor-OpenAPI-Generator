@@ -6,6 +6,7 @@ import com.papsign.ktor.openapigen.modules.registerModule
 import com.papsign.ktor.openapigen.route.OpenAPIRoute
 import com.papsign.ktor.openapigen.route.response.AuthResponseContextImpl
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineAuthContext
+import io.ktor.http.*
 import io.ktor.routing.Route
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -34,7 +35,7 @@ class OpenAPIAuthenticatedRoute<TAuth>(
                 responseType,
                 requestType
             ) { pipeline, responder, p, b ->
-                AuthResponseContextImpl<TAuth, TResponse>(pipeline, authProvider, this, responder).body(p, b)
+                AuthResponseContextImpl<TAuth, TResponse>(pipeline, authProvider, this, HttpStatusCode.OK, responder).body(p, b)
             }
         }
     }
@@ -52,7 +53,7 @@ class OpenAPIAuthenticatedRoute<TAuth>(
                 responseType,
                 typeOf<Unit>()
             ) { pipeline, responder, p: TParams, _ ->
-                AuthResponseContextImpl<TAuth, TResponse>(pipeline, authProvider, this, responder).body(p)
+                AuthResponseContextImpl<TAuth, TResponse>(pipeline, authProvider, this, HttpStatusCode.OK, responder).body(p)
             }
         }
     }

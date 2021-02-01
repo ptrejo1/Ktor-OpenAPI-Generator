@@ -18,11 +18,11 @@ import kotlin.reflect.KAnnotatedElement
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
 
-class ResponseHandlerModule<T>(val responseType: KType, val responseExample: T? = null) : OperationModule {
+class ResponseHandlerModule<T>(val responseType: KType, val responseExample: T? = null, val httpStatusCode: HttpStatusCode?) : OperationModule {
     private val log = classLogger()
     override fun configure(apiGen: OpenAPIGen, provider: ModuleProvider<*>, operation: OperationModel) {
         val responseMeta = (responseType.classifier as? KAnnotatedElement)?.findAnnotation<Response>()
-        val statusCode =  provider.ofType<StatusProvider>().lastOrNull()?.getStatusForType(responseType) ?: responseMeta?.statusCode?.let { HttpStatusCode.fromValue(it) }
+        val statusCode = httpStatusCode ?: provider.ofType<StatusProvider>().lastOrNull()?.getStatusForType(responseType) ?: responseMeta?.statusCode?.let { HttpStatusCode.fromValue(it) }
         ?: HttpStatusCode.OK
         val status = statusCode.value.toString()
         val map = provider.ofType<ResponseSerializer>().mapNotNull {
@@ -45,6 +45,6 @@ class ResponseHandlerModule<T>(val responseType: KType, val responseExample: T? 
     }
 
     companion object {
-        fun <T : Any> create(tType: KType, responseExample: T? = null) = ResponseHandlerModule(tType, responseExample)
+        fun <T : Any> create(tType: KType, responseExample: T? = null, httpStatusCode: HttpStatusCode?) = ResponseHandlerModule(tType, responseExample, httpStatusCode)
     }
 }

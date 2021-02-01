@@ -9,7 +9,7 @@ import com.papsign.ktor.openapigen.modules.handlers.ResponseHandlerModule
 import com.papsign.ktor.openapigen.modules.registerModule
 import com.papsign.ktor.openapigen.route.modules.HttpMethodProviderModule
 import com.papsign.ktor.openapigen.route.modules.PathProviderModule
-import io.ktor.http.HttpMethod
+import io.ktor.http.*
 import io.ktor.routing.HttpMethodRouteSelector
 import io.ktor.routing.createRouteFromPath
 import io.ktor.util.pipeline.ContextDsl
@@ -115,6 +115,7 @@ inline fun <TRoute : OpenAPIRoute<TRoute>> TRoute.tag(tag: APITag, crossinline f
 }
 
 inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : Any, TRoute : OpenAPIRoute<TRoute>> TRoute.preHandle(
+    statusCode: HttpStatusCode?,
     exampleResponse: TResponse? = null,
     exampleRequest: TRequest? = null,
     noinline handle: TRoute.() -> Unit
@@ -123,6 +124,7 @@ inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : A
         typeOf<TParams>(),
         typeOf<TResponse>(),
         typeOf<TRequest>(),
+        statusCode,
         exampleResponse,
         exampleRequest,
         handle
@@ -135,6 +137,7 @@ internal fun <TParams : Any, TResponse : Any, TRequest : Any, TRoute : OpenAPIRo
     pType: KType,
     rType: KType,
     bType: KType,
+    statusCode: HttpStatusCode?,
     exampleResponse: TResponse? = null,
     exampleRequest: TRequest? = null,
     handle: TRoute.() -> Unit
@@ -152,7 +155,8 @@ internal fun <TParams : Any, TResponse : Any, TRequest : Any, TRoute : OpenAPIRo
         provider.registerModule(
             ResponseHandlerModule.create(
                 rType,
-                exampleResponse
+                exampleResponse,
+                statusCode
             ),
             ResponseHandlerModule::class.createType(listOf(KTypeProjection(KVariance.INVARIANT, rType)))
         )

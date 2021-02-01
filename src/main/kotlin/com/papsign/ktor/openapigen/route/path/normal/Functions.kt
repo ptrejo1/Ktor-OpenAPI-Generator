@@ -4,7 +4,7 @@ import com.papsign.ktor.openapigen.modules.RouteOpenAPIModule
 import com.papsign.ktor.openapigen.route.method
 import com.papsign.ktor.openapigen.route.preHandle
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineResponseContext
-import io.ktor.http.HttpMethod
+import io.ktor.http.*
 import io.ktor.util.pipeline.ContextDsl
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.typeOf
@@ -21,10 +21,11 @@ import kotlin.reflect.typeOf
  */
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any> NormalOpenAPIRoute.get(
+    statusCode: HttpStatusCode? = null,
     vararg modules: RouteOpenAPIModule,
     example: TResponse? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams) -> Unit
-) = route(HttpMethod.Get, modules, example, body)
+) = route(HttpMethod.Get, modules, statusCode, example, body)
 
 /**
  * Builds a route to match `POST` requests generating OpenAPI documentation.
@@ -40,11 +41,12 @@ inline fun <reified TParams : Any, reified TResponse : Any> NormalOpenAPIRoute.g
  */
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : Any> NormalOpenAPIRoute.post(
+    statusCode: HttpStatusCode? = null,
     vararg modules: RouteOpenAPIModule,
     exampleResponse: TResponse? = null,
     exampleRequest: TRequest? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams, TRequest) -> Unit
-) = route(HttpMethod.Post, modules, exampleResponse, exampleRequest, body)
+) = route(HttpMethod.Post, modules, statusCode, exampleResponse, exampleRequest, body)
 
 /**
  * Builds a route to match `PUT` requests generating OpenAPI documentation.
@@ -60,11 +62,12 @@ inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : A
  */
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : Any> NormalOpenAPIRoute.put(
+    statusCode: HttpStatusCode? = null,
     vararg modules: RouteOpenAPIModule,
     exampleResponse: TResponse? = null,
     exampleRequest: TRequest? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams, TRequest) -> Unit
-) = route(HttpMethod.Put, modules, exampleResponse, exampleRequest, body)
+) = route(HttpMethod.Put, modules, statusCode, exampleResponse, exampleRequest, body)
 
 /**
  * Builds a route to match `PATCH` requests generating OpenAPI documentation.
@@ -80,11 +83,12 @@ inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : A
  */
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : Any> NormalOpenAPIRoute.patch(
+    statusCode: HttpStatusCode? = null,
     vararg modules: RouteOpenAPIModule,
     exampleResponse: TResponse? = null,
     exampleRequest: TRequest? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams, TRequest) -> Unit
-) = route(HttpMethod.Patch, modules, exampleResponse, exampleRequest, body)
+) = route(HttpMethod.Patch, modules, statusCode, exampleResponse, exampleRequest, body)
 
 /**
  * Builds a route to match `DELETE` requests generating OpenAPI documentation.
@@ -98,10 +102,11 @@ inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : A
  */
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any> NormalOpenAPIRoute.delete(
+    statusCode: HttpStatusCode? = null,
     vararg modules: RouteOpenAPIModule,
     example: TResponse? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams) -> Unit
-) = route(HttpMethod.Delete, modules, example, body)
+) = route(HttpMethod.Delete, modules, statusCode, example, body)
 
 /**
  * Builds a route to match `HEAD` requests generating OpenAPI documentation.
@@ -115,10 +120,11 @@ inline fun <reified TParams : Any, reified TResponse : Any> NormalOpenAPIRoute.d
  */
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any> NormalOpenAPIRoute.head(
+    statusCode: HttpStatusCode? = null,
     vararg modules: RouteOpenAPIModule,
     example: TResponse? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams) -> Unit
-) = route(HttpMethod.Head, modules, example, body)
+) = route(HttpMethod.Head, modules, statusCode, example, body)
 
 /**
  * Builds a route to match requests with the specified [method] generating OpenAPI documentation.
@@ -137,42 +143,46 @@ inline fun <reified TParams : Any, reified TResponse : Any> NormalOpenAPIRoute.h
 inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : Any> NormalOpenAPIRoute.route(
     method: HttpMethod,
     modules: Array<out RouteOpenAPIModule>,
+    statusCode: HttpStatusCode?,
     exampleResponse: TResponse? = null,
     exampleRequest: TRequest? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams, TRequest) -> Unit
 ) {
     method(method).apply { modules.forEach { provider.registerModule(it, it::class.starProjectedType) } }
-        .handle(exampleResponse, exampleRequest, body)
+        .handle(statusCode, exampleResponse, exampleRequest, body)
 }
 
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any> NormalOpenAPIRoute.route(
     method: HttpMethod,
     modules: Array<out RouteOpenAPIModule>,
+    statusCode: HttpStatusCode?,
     exampleResponse: TResponse? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams) -> Unit
 ) {
     method(method).apply { modules.forEach { provider.registerModule(it, it::class.starProjectedType) } }
-        .handle(exampleResponse, body)
+        .handle(statusCode, exampleResponse, body)
 }
 
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : Any> NormalOpenAPIRoute.handle(
+    statusCode: HttpStatusCode?,
     exampleResponse: TResponse? = null,
     exampleRequest: TRequest? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams, TRequest) -> Unit
 ) {
-    preHandle<TParams, TResponse, TRequest, NormalOpenAPIRoute>(exampleResponse, exampleRequest) {
-        handle(typeOf<TParams>(), typeOf<TResponse>(), typeOf<TRequest>(), body)
+    preHandle<TParams, TResponse, TRequest, NormalOpenAPIRoute>(statusCode, exampleResponse, exampleRequest) {
+        handle(typeOf<TParams>(), typeOf<TResponse>(), typeOf<TRequest>(), statusCode, body)
     }
 }
 
 @ContextDsl
 inline fun <reified TParams : Any, reified TResponse : Any> NormalOpenAPIRoute.handle(
+    statusCode: HttpStatusCode?,
     exampleResponse: TResponse? = null,
     noinline body: suspend OpenAPIPipelineResponseContext<TResponse>.(TParams) -> Unit
 ) {
-    preHandle<TParams, TResponse, Unit, NormalOpenAPIRoute>(exampleResponse, Unit) {
-        handle(typeOf<TParams>(), typeOf<TResponse>(), body)
+    preHandle<TParams, TResponse, Unit, NormalOpenAPIRoute>(statusCode, exampleResponse, Unit) {
+        handle(typeOf<TParams>(), typeOf<TResponse>(), statusCode, body)
     }
 }

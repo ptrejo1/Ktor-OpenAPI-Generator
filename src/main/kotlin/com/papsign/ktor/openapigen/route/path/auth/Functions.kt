@@ -4,7 +4,7 @@ import com.papsign.ktor.openapigen.modules.RouteOpenAPIModule
 import com.papsign.ktor.openapigen.route.method
 import com.papsign.ktor.openapigen.route.preHandle
 import com.papsign.ktor.openapigen.route.response.OpenAPIPipelineAuthContext
-import io.ktor.http.HttpMethod
+import io.ktor.http.*
 import io.ktor.util.pipeline.ContextDsl
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.typeOf
@@ -83,7 +83,7 @@ inline fun <reified TParams : Any, reified TResponse : Any, reified TRequest : A
     exampleRequest: TRequest? = null,
     noinline body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams, TRequest) -> Unit
 ) {
-    preHandle<TParams, TResponse, TRequest, OpenAPIAuthenticatedRoute<TAuth>>(exampleResponse, exampleRequest) {
+    preHandle<TParams, TResponse, TRequest, OpenAPIAuthenticatedRoute<TAuth>>(HttpStatusCode.OK, exampleResponse, exampleRequest) {
         handle(typeOf<TParams>(), typeOf<TResponse>(), typeOf<TRequest>(), body)
     }
 }
@@ -93,7 +93,7 @@ inline fun <reified TParams : Any, reified TResponse : Any, TAuth> OpenAPIAuthen
     exampleResponse: TResponse? = null,
     noinline body: suspend OpenAPIPipelineAuthContext<TAuth, TResponse>.(TParams) -> Unit
 ) {
-    preHandle<TParams, TResponse, Unit, OpenAPIAuthenticatedRoute<TAuth>>(exampleResponse, Unit) {
+    preHandle<TParams, TResponse, Unit, OpenAPIAuthenticatedRoute<TAuth>>(HttpStatusCode.OK, exampleResponse, Unit) {
         handle(typeOf<TParams>(), typeOf<TResponse>(), body)
     }
 }

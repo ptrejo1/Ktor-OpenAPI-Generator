@@ -22,7 +22,9 @@ interface OpenAPIPipelineContext {
     val responder: Responder
 }
 
-interface OpenAPIPipelineResponseContext<TResponse> : OpenAPIPipelineContext
+interface OpenAPIPipelineResponseContext<TResponse> : OpenAPIPipelineContext {
+    val httpStatusCode: HttpStatusCode?
+}
 interface OpenAPIPipelineAuthContext<TAuth, TResponse> : OpenAPIPipelineResponseContext<TResponse> {
     val authProvider: AuthProvider<TAuth>
 }
@@ -30,6 +32,7 @@ interface OpenAPIPipelineAuthContext<TAuth, TResponse> : OpenAPIPipelineResponse
 class ResponseContextImpl<TResponse>(
         override val pipeline: PipelineContext<Unit, ApplicationCall>,
         override val route: OpenAPIRoute<*>,
+        override val httpStatusCode: HttpStatusCode?,
         override val responder: Responder
 ) : OpenAPIPipelineResponseContext<TResponse>
 
@@ -37,11 +40,12 @@ class AuthResponseContextImpl<TAuth, TResponse>(
         override val pipeline: PipelineContext<Unit, ApplicationCall>,
         override val authProvider: AuthProvider<TAuth>,
         override val route: OpenAPIRoute<*>,
+        override val httpStatusCode: HttpStatusCode?,
         override val responder: Responder
 ) : OpenAPIPipelineAuthContext<TAuth, TResponse>
 
 
 suspend inline fun <reified TResponse : Any> OpenAPIPipelineResponseContext<TResponse>.respond(response: TResponse) {
-    val statusCode = route.provider.ofType<StatusProvider>().lastOrNull()?.getStatusForType(getKType<TResponse>()) ?: TResponse::class.findAnnotation<Response>()?.statusCode?.let { HttpStatusCode.fromValue(it) } ?: HttpStatusCode.OK
+    val statusCode = httpStatusCode ?: route.provider.ofType<StatusProvider>().lastOrNull()?.getStatusForType(getKType<TResponse>()) ?: TResponse::class.findAnnotation<Response>()?.statusCode?.let { HttpStatusCode.fromValue(it) } ?: HttpStatusCode.OK
     responder.respond(statusCode, response as Any, pipeline)
 }

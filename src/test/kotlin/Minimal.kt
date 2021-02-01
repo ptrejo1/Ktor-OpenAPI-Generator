@@ -17,6 +17,7 @@ import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
+import io.ktor.http.*
 import io.ktor.jackson.jackson
 import io.ktor.response.respond
 import io.ktor.response.respondRedirect
@@ -75,11 +76,12 @@ object Minimal {
             apiRouting {
 
                 //bare minimum, just like Ktor but strongly typed
-                get<StringParam, StringResponse> { params ->
+                get<StringParam, StringResponse>(HttpStatusCode.Accepted) { params ->
                     respond(StringResponse(params.a))
                 }
 
                 route("inine").get<StringParam, StringResponse>(
+                    HttpStatusCode.NoContent,
                     info("String Param Endpoint", "This is a String Param Endpoint"), // A Route module that describes an endpoint, it is optional
                     example = StringResponse("Hi")
                 ) { params ->
@@ -89,6 +91,7 @@ object Minimal {
                 route("block") {
                     // use Unit if there are no parameters / body / response
                     post<Unit, StringUsable,  StringUsable>(
+                        HttpStatusCode.InternalServerError,
                         info("String Post Endpoint", "This is a String Post Endpoint"),
                         exampleRequest = StringUsable("Ho"),
                         exampleResponse = StringUsable("Ho")
