@@ -8,8 +8,7 @@ import com.papsign.ktor.openapigen.route.response.respond
 import com.papsign.ktor.openapigen.route.route
 import installJackson
 import installOpenAPI
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
+import io.ktor.http.*
 import io.ktor.routing.Routing
 import io.ktor.server.testing.contentType
 import io.ktor.server.testing.handleRequest
@@ -129,6 +128,62 @@ class RoutingTest {
                 addHeader(HttpHeaders.Accept, "application/json")
             }.apply {
                 assertTrue { response.contentType().match("application/json") }
+                assertEquals(
+                    "{\"msg\":\"Test Response\"}",
+                    response.content
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testGetWithStatusCode() {
+        val route = "/test"
+        withTestApplication({
+            installOpenAPI()
+            installJackson()
+            apiRouting {
+                (this.ktorRoute as Routing).trace { println(it.buildText()) }
+                route(route) {
+                    get<Unit, TestResponse>(statusCode = HttpStatusCode.Accepted) { params ->
+                        respond(TestResponse("Test Response"))
+                    }
+                }
+            }
+        }) {
+            handleRequest(HttpMethod.Get, route) {
+                addHeader(HttpHeaders.Accept, "application/json")
+            }.apply {
+                assertTrue { response.contentType().match("application/json") }
+                assertEquals(HttpStatusCode.Accepted, response.status())
+                assertEquals(
+                    "{\"msg\":\"Test Response\"}",
+                    response.content
+                )
+            }
+        }
+    }
+
+    @Test
+    fun testPostWithStatusCode() {
+        val route = "/test"
+        withTestApplication({
+            installOpenAPI()
+            installJackson()
+            apiRouting {
+                (this.ktorRoute as Routing).trace { println(it.buildText()) }
+                route(route) {
+                    post<Unit, TestResponse, Unit>(statusCode = HttpStatusCode.Created) { params, body ->
+                        respond(TestResponse("Test Response"))
+                    }
+                }
+            }
+        }) {
+            handleRequest(HttpMethod.Post, route) {
+                addHeader(HttpHeaders.Accept, "application/json")
+            }.apply {
+                assertTrue { response.contentType().match("application/json") }
+                assertEquals(HttpStatusCode.Created, response.status())
                 assertEquals(
                     "{\"msg\":\"Test Response\"}",
                     response.content

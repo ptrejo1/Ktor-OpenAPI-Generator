@@ -80,9 +80,13 @@ object Minimal {
                     respond(StringResponse(params.a))
                 }
 
+                // Can also provide status code that will override any response annotations
+                post<Unit, StringUsable, StringUsable>(statusCode = HttpStatusCode.Created) { params, body ->
+                    respond(body)
+                }
+
                 route("inine").get<StringParam, StringResponse>(
                     info("String Param Endpoint", "This is a String Param Endpoint"), // A Route module that describes an endpoint, it is optional
-                    statusCode = HttpStatusCode.OK,
                     example = StringResponse("Hi")
                 ) { params ->
                     respond(StringResponse(params.a))
@@ -92,7 +96,6 @@ object Minimal {
                     // use Unit if there are no parameters / body / response
                     post<Unit, StringUsable,  StringUsable>(
                         info("String Post Endpoint", "This is a String Post Endpoint"),
-                        statusCode = HttpStatusCode.OK,
                         exampleRequest = StringUsable("Ho"),
                         exampleResponse = StringUsable("Ho")
                     ) { params, body ->

@@ -18,6 +18,7 @@ import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
+import io.ktor.http.*
 import io.ktor.jackson.jackson
 import io.ktor.response.respond
 import io.ktor.response.respondRedirect
@@ -78,6 +79,11 @@ object Basic {
                 //bare minimum, just like Ktor but strongly typed
                 get<StringParam, StringParam> { params ->
                     respond(params)
+                }
+
+                // Can also provide status code that will override any response annotations
+                post<Unit, StringUsable, StringUsable>(statusCode = HttpStatusCode.Created) { params, body ->
+                    respond(body)
                 }
 
                 route("inine").get<StringParam, StringResponse>(
